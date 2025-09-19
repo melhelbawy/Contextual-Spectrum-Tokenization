@@ -261,14 +261,166 @@ While challenges remain in computational efficiency and training stability, our 
 
 ## Appendix A: Architecture Diagrams
 
-```
-[Detailed architectural diagrams would be included showing:]
-1. CST pipeline flow
-2. Hybrid decision tree
-3. Spectrum manifold visualization
-4. Transformer integration points
-5. Caching architecture
-```
+Okay, Mohamed, I can certainly provide detailed descriptions for each of the architecture diagrams you'll need for Appendix A. Since I cannot generate actual images, I will give you comprehensive textual descriptions that you can use to create the diagrams yourself using tools like draw.io, Lucidchart, or even PowerPoint/Keynote.
+
+These descriptions are designed to be clear and informative, guiding you on what elements to include and how they relate to each other.
+
+---
+
+## Appendix A: Architecture Diagrams
+
+### 1. CST Pipeline Flow
+
+**Description:** This diagram illustrates the complete end-to-end flow of text processing within a CST-enhanced transformer model, highlighting where CST intervenes.
+
+**Elements to Include:**
+
+*   **Input Layer:**
+    *   **Raw Text:** Starting point.
+    *   **External Context Signals:** Multimodal data (image embeddings, audio embeddings), Document-level metadata (author, domain, timestamp), User interaction history. These are inputs to the CST Module.
+
+*   **CST Module (Central Box):** This is the core of the diagram, showing the internal components and their interaction.
+    *   **Text Fragments / Token IDs:** Output from an initial, standard subword tokenizer (e.g., BPE) applied to Raw Text.
+    *   **Ambiguity Classifier:** Takes `Text Fragments` and `Local Context` (from Text Fragments) + `External Context Signals`. Decision output: `Is Ambiguous? (Yes/No)`.
+    *   **CST Cache (LRU/Distributed):** Interacts with the `Ambiguity Classifier` and `Spectrum Mapper`. If `Is Ambiguous?` is No OR `Cache Hit` occurs, output is `Static Embedding` or `Cached Spectrum Vector`. If `Is Ambiguous?` is Yes AND `Cache Miss`, triggers `Spectrum Mapper`.
+    *   **Static Embeddings Lookup:** Standard embedding table for non-ambiguous or cached tokens.
+    *   **Spectrum Mapper:** Takes `Text Fragment`, `Local Context`, and `External Context Signals`. Computes and outputs `Contextual Spectrum Vector`. This happens for cache misses of ambiguous tokens.
+    *   **Output of CST Module:** A stream of `Contextual Spectrum Vectors` (dynamic) or `Static Embeddings` (static/cached), all of `d_model` dimension.
+
+*   **Downstream Transformer:**
+    *   **Positional Encoding:** Adds positional information to the vectors from the CST Module.
+    *   **Transformer Layers:** Stacked layers (Encoder or Encoder-Decoder) processing the enriched, positionally encoded vectors.
+    *   **Output Head:** Final task-specific layer (e.g., for classification, generation).
+
+**Flow/Arrows:**
+
+1.  `Raw Text` → Initial Tokenization (e.g., BPE) → `Text Fragments / Token IDs`.
+2.  `Text Fragments / Token IDs` and `External Context Signals` → `CST Module`.
+3.  Inside `CST Module`:
+    *   `Text Fragments / Token IDs` + `External Context Signals` → `Ambiguity Classifier`.
+    *   `Ambiguity Classifier` → Decision point (`Is Ambiguous?`).
+    *   Decision influences whether `Static Embeddings Lookup` or `Spectrum Mapper` is used, also interacting with `CST Cache`.
+    *   `CST Cache` → `CST Module Output`.
+    *   `Static Embeddings Lookup` → `CST Module Output`.
+    *   `Spectrum Mapper` → `CST Module Output`.
+4.  `CST Module Output` → `Positional Encoding`.
+5.  `Positional Encoding` → `Transformer Layers`.
+6.  `Transformer Layers` → `Output Head`.
+
+**Visual Style:** Use distinct boxes for modules, arrows for data flow. Highlight the CST Module as the innovative component.
+
+### 2. Hybrid Decision Tree
+
+**Description:** This diagram provides a flowchart-style representation of how the CST module decides between static and dynamic token representation for each text fragment.
+
+**Elements to Include:**
+
+*   **Start Node:** "Process Token `t` and its `Context C`"
+*   **Decision 1 (Diamond Shape):** "Is (`token t`, `context C`) in Cache?"
+    *   **Path: YES**
+        *   **Action Node:** "Retrieve `Cached Spectrum Vector`"
+        *   **End Node:** "Output `Contextual Spectrum Vector`"
+    *   **Path: NO**
+        *   **Decision 2 (Diamond Shape):** "Ambiguity Classifier: Is `token t` ambiguous in `Context C`?"
+            *   **Path: NO**
+                *   **Action Node:** "Lookup `Static Embedding` for `token t`"
+                *   **End Node:** "Output `Static Embedding`"
+            *   **Path: YES**
+                *   **Action Node:** "Compute `Contextual Spectrum Vector` using `Spectrum Mapper(token t, context C)`"
+                *   **Action Node:** "Add (`token t`, `context C`) and computed vector to Cache"
+                *   **End Node:** "Output `Contextual Spectrum Vector`"
+
+**Visual Style:** Standard flowchart symbols (ovals for start/end, rectangles for processes, diamonds for decisions). Clear directional arrows.
+
+### 3. Spectrum Manifold Visualization
+
+**Description:** This conceptual diagram visualizes the idea of the "semantic spectrum manifold" in a reduced 2D/3D space, showing how polysemous words shift positions based on context.
+
+**Elements to Include:**
+
+*   **3D/2D Scatter Plot:** A visual representation of an embedding space.
+*   **Reference Points (Fixed):**
+    *   Plot several static word embeddings as grey/faint dots (e.g., "cat," "dog," "run," "fast"). These represent a traditional, fixed embedding space.
+*   **Polysemous Word Trajectories/Clusters:**
+    *   **"Bank":**
+        *   A cluster of points (or a trajectory) representing "bank (financial institution)" in various financial contexts, potentially near "money," "loan," "ATM." Color this cluster (e.g., blue).
+        *   Another cluster of points (or a trajectory) representing "bank (river edge)" in various natural contexts, potentially near "river," "shore," "tree." Color this cluster (e.g., green).
+        *   An arrow or line connecting the "static" position of "bank" to these two context-dependent clusters, showing its "spectrum."
+    *   **"Apple":**
+        *   A cluster for "Apple (fruit)," near "fruit," "tree," "juice." Color (e.g., red).
+        *   A cluster for "Apple (company)," near "tech," "iPhone," "software." Color (e.g., purple).
+*   **Context Arrows (Optional):** Small arrows originating from a static word point and pointing towards its contextualized spectrum positions, with labels like "Context: financial report" or "Context: nature walk."
+*   **Axes Labels (Conceptual):** "Semantic Dimension 1," "Semantic Dimension 2" (or "Contextual Axis," "Lexical Axis" if you want to be more suggestive).
+
+**Visual Style:** A cloud of dots/points in a conceptual space. Use different colors for different senses/contexts. Show overlap but also clear separation. The idea is to convey *dynamic positioning* and *disambiguation*.
+
+### 4. Transformer Integration Points
+
+**Description:** This diagram focuses on how the CST Module fits into the larger transformer architecture, emphasizing where the output of CST feeds into the subsequent layers.
+
+**Elements to Include:**
+
+*   **Left Side - Input Processing:**
+    *   **Raw Text**
+    *   **Tokenizer (e.g., BPE):** Generates `Token IDs`.
+    *   **CST Module (Box):** Takes `Token IDs` and `Contextual Signals`. Outputs `Contextual Spectrum Vectors`.
+*   **Center - Core Transformer:**
+    *   **Positional Encoding:** Takes `Contextual Spectrum Vectors`. Adds `Positional Information`.
+    *   **Transformer Encoder Layers (Stack):** A series of `Transformer Layer` blocks (Self-Attention, Feed-Forward, Layer Norm, Residual Connections).
+    *   **Transformer Decoder Layers (Stack, if applicable):** Similar to Encoder layers, but with Cross-Attention.
+*   **Right Side - Output Layer:**
+    *   **Output Head:** Final prediction layer.
+
+**Flow/Arrows:**
+
+1.  `Raw Text` → `Tokenizer` → `Token IDs`.
+2.  `Token IDs` (+ `Contextual Signals`) → `CST Module`.
+3.  `CST Module` outputs `Contextual Spectrum Vectors`.
+4.  `Contextual Spectrum Vectors` → `Positional Encoding`.
+5.  `Positionally Encoded Vectors` → First `Transformer Encoder Layer`.
+6.  Output of one `Transformer Encoder Layer` → Input of next.
+7.  (If Decoder) `Encoder Output` and `Decoder Input` → `Transformer Decoder Layers`.
+8.  Final `Transformer Output` → `Output Head`.
+
+**Visual Style:** A linear flow, emphasizing the sequence. CST replaces the traditional "Embedding Lookup" block. You can draw the standard transformer block (multi-head attention, feed-forward, add&norm) for clarity.
+
+### 5. Caching Architecture
+
+**Description:** This diagram illustrates the multi-level caching system designed for CST to achieve efficient inference, showing the interaction between different cache tiers.
+
+**Elements to Include:**
+
+*   **User/Application Request:** Initiates the tokenization process with `(token, context)` pairs.
+*   **ProductionCST Encoder (Main Processing Unit):**
+    *   **Cache Key Generator:** Creates a hash from `(token, context)` for lookup.
+*   **L1 Cache (In-Memory LRU Cache):**
+    *   **Location:** Local to the inference server/GPU.
+    *   **Capacity:** Smaller, faster access.
+    *   **Hit/Miss Logic:** Checks for presence of `cache_key`.
+*   **L2 Cache (Distributed Redis Cache):**
+    *   **Location:** External, shared across multiple inference servers.
+    *   **Capacity:** Larger, slower than L1 but faster than recomputation.
+    *   **Hit/Miss Logic:** Checks if L1 misses.
+*   **CST Module / Spectrum Mapper (Dynamic Computation Unit):**
+    *   **Trigger:** Only called if both L1 and L2 caches miss.
+    *   **Output:** `Computed Spectrum Vector`.
+*   **Cache Update Paths:** Arrows showing where `Computed Spectrum Vector` is written back to L1 and L2 caches.
+*   **Output to Downstream Model:** The final `Spectrum Vector` (from any source) is passed on.
+
+**Flow/Arrows:**
+
+1.  `User/Application Request (token, context)` → `ProductionCST Encoder`.
+2.  `ProductionCST Encoder` uses `Cache Key Generator`.
+3.  `Cache Key` → Query `L1 Cache`.
+    *   **L1 Hit:** `Spectrum Vector` from `L1 Cache` → `Output`.
+    *   **L1 Miss:** `Cache Key` → Query `L2 Cache`.
+        *   **L2 Hit:** `Spectrum Vector` from `L2 Cache` → Store in `L1 Cache` → `Output`.
+        *   **L2 Miss:** `(token, context)` → `CST Module / Spectrum Mapper`.
+            *   `CST Module` outputs `Computed Spectrum Vector`.
+            *   `Computed Spectrum Vector` → Store in `L1 Cache` & `L2 Cache`.
+            *   `Computed Spectrum Vector` → `Output`.
+
+**Visual Style:** Stacked or layered boxes for caches, with the CST Module as the ultimate fallback. Use arrows to show the query and data flow, indicating cache hit/miss paths clearly.
 
 ## Appendix B: Implementation Details
 
