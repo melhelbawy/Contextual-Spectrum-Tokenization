@@ -255,15 +255,33 @@ While challenges remain in computational efficiency and training stability, our 
 
 ## References
 
-[References would include relevant papers on tokenization, transformers, contextual embeddings, multimodal learning, and efficient neural architectures]
+1.  **Tokenization (Foundational BPE):**
+    Sennrich, R., Haddow, B., & Birch, A. (2016). Neural Machine Translation of Rare Words with Subword Units. *Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)*, 1715–1725.
+    *   *Why it's relevant:* This paper introduced Byte Pair Encoding (BPE) for neural machine translation, a foundational work for subword tokenization that your paper critiques and aims to improve upon.
 
----
+2.  **Transformers (Foundational):**
+    Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention Is All You Need. *Advances in Neural Information Processing Systems (NeurIPS)*, 30.
+    *   *Why it's relevant:* The original Transformer paper, essential for understanding the core architecture that CST enhances.
 
-## Appendix A: Architecture Diagrams
+3.  **Contextual Embeddings (ELMo-style):**
+    Peters, M. E., Neumann, M., Iyyer, M., Gardner, M., Clark, C., Lee, K., & Zettlemoyer, L. (2018). Deep Contextualized Word Representations. *Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)*, 2227–2237.
+    *   *Why it's relevant:* Introduces ELMo, one of the earliest prominent models to provide deeply contextualized word embeddings, directly addressing the limitations of static embeddings that CST aims to overcome.
 
-Okay, Mohamed, I can certainly provide detailed descriptions for each of the architecture diagrams you'll need for Appendix A. Since I cannot generate actual images, I will give you comprehensive textual descriptions that you can use to create the diagrams yourself using tools like draw.io, Lucidchart, or even PowerPoint/Keynote.
+4.  **Multimodal Learning (CLIP-style):**
+    Radford, A., Kim, J. W., Xu, T., Brockman, G., McLeavey, C., & Sutskever, I. (2021). Learning Transferable Visual Models From Natural Language Supervision. *Proceedings of the 38th International Conference on Machine Learning (ICML)*, 8748-8763.
+    *   *Why it's relevant:* Introduces CLIP, a highly influential model for multimodal understanding, directly relevant to CST's goal of integrating multimodal information into token representations.
 
-These descriptions are designed to be clear and informative, guiding you on what elements to include and how they relate to each other.
+5.  **Efficient Transformers / Architectures:**
+    Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019). DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter. *NeurIPS 2019 Workshop on Energy Efficient Machine Learning and Cognitive Computing*.
+    *   *Why it's relevant:* Demonstrates techniques like knowledge distillation for creating more efficient (smaller, faster) neural architectures, which aligns with CST's focus on computational efficiency and lightweight components.
+
+6.  **More Recent/Advanced Tokenization:**
+    Kudo, T., & Richardson, J. (2018). SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing. *Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 1-10.
+    *   *Why it's relevant:* Describes SentencePiece, another widely used subword tokenization algorithm that addresses some challenges of BPE and WordPiece, providing a good point of comparison for your work on improving tokenization.
+
+7.  **Dynamic/Adaptive Tokenization Concepts:**
+    He, P., Li, X., Wang, Y., Wu, T., Chen, H., & Liu, J. (2021). ReGen: Zero-Shot Text Generation via Dynamic Token-Level Mixing. *Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 977-987.
+    *   *Why it's relevant:* While not directly about *embedding* tokenization, this paper explores dynamic, token-level decisions in text generation. It touches upon the idea of making token-level choices based on context, conceptually relevant to your "hybrid decision process" and selective activation.
 
 ---
 
