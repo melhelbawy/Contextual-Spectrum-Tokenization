@@ -22,8 +22,8 @@ CST enhances transformer models by dynamically computing contextual spectrum vec
 
 ### From Source
 ```bash
-git clone [https://github.com/yourusername/cst-implementation.git](https://github.com/melhelbawy/Contextual-Spectrum-Tokenization.git)
-cd cst-implementation
+git clone [https://github.com/melhelbawy/Contextual-Spectrum-Tokenization.git]
+cd .\src\cst\models\
 pip install -e .
 ```
 
