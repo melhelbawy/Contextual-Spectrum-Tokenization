@@ -2,7 +2,7 @@
 
 ## Abstract
 
-We present **Contextual Spectrum Tokenization (CST)**, a novel tokenization architecture that replaces static embedding lookups with dynamically computed contextual spectrum vectors. Unlike traditional approaches that map text fragments to fixed embeddings, CST employs a **Spectrum Mapper** module that integrates local textual context, document-level signals, and multimodal information to generate context-aware representations. Our implementation-ready architecture addresses computational efficiency through selective activation, intelligent caching, and optimized training procedures. Experimental validation demonstrates significant improvements in semantic disambiguation tasks while maintaining practical inference speeds. We provide complete implementation details, training protocols, and deployment strategies for production environments.
+The **Contextual Spectrum Tokenization (CST)**, a novel tokenization architecture that replaces static embedding lookups with dynamically computed contextual spectrum vectors. Unlike traditional approaches that map text fragments to fixed embeddings, CST employs a **Spectrum Mapper** module that integrates local textual context, document-level signals, and multimodal information to generate context-aware representations. Our implementation-ready architecture addresses computational efficiency through selective activation, intelligent caching, and optimized training procedures. Experimental validation demonstrates significant improvements in semantic disambiguation tasks while maintaining practical inference speeds. We provide complete implementation details, training protocols, and deployment strategies for production environments.
 
 ## 1. Introduction
 
