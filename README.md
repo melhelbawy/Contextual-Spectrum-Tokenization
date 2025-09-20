@@ -155,28 +155,3 @@ Contributions are welcome! If you have suggestions, bug reports, or want to cont
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ---
 ```
-
----
-
-**Important Customization Points for you:**
-
-1.  **`![CST Architecture Diagram](docs/cst_pipeline_flow.png)`**:
-    *   **Image Path:** You need to create your architecture diagrams (like the CST Pipeline Flow diagram I described) and save them in a `docs/` folder (or another suitable location). Then, update the `path` in `(docs/cst_pipeline_flow.png)` to point to your actual diagram image. If you have multiple, you can add more images or link to a `docs/` folder that contains them.
-    *   **Actual Diagrams:** This is where you'd place the rendered Mermaid diagrams (saved as PNGs or SVGs).
-
-2.  **`[[Preprint Link / Journal Link (if available)]](YOUR_PAPER_LINK_HERE)`**:
-    *   Once your paper is available as a preprint (e.g., on arXiv) or published in a journal, replace `YOUR_PAPER_LINK_HERE` with the actual URL.
-
-3.  **Installation / Usage Examples:**
-    *   The code snippets in the "Installation" and "Usage" sections are illustrative. You **must** replace them with precise instructions and actual, runnable code snippets from your repository that reflect how someone would truly install your dependencies, run your training script, or use your `ProductionCST` class.
-    *   Pay close attention to placeholders like `"path/to/your/trained_cst_model.pt"` and example `torch.tensor` inputs.
-
-4.  **`[Your GitHub Profile Link]`**: Replace this with your actual GitHub profile URL.
-
-5.  **`[Your LinkedIn Profile Link (Optional)]`**: Add this if you wish.
-
-6.  **`LICENSE` file**: Ensure you have a `LICENSE` file in your repository (e.g., `LICENSE.md` or `LICENSE.txt`) with the MIT License text. GitHub provides options to add a license when you create a new repository or you can add it manually.
-
-7.  **`requirements.txt`**: Make sure this file accurately lists all Python dependencies.
-
-By filling in these specifics, you'll have a highly professional and functional `README.md` for your CST project!
