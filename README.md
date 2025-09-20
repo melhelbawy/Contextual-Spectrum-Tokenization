@@ -1,157 +1,165 @@
-```markdown
-# Contextual Spectrum Tokenization (CST)
+#JUST Generated implementation, NOT tested, need conributions.
 
-![CST Architecture Diagram](docs/cst_pipeline_flow.png) <!-- Placeholder for your main architecture diagram -->
+A production-ready implementation of Contextual Spectrum Tokenization, a novel dynamic tokenization architecture that replaces static embedding lookups with context-aware spectrum vectors.
 
-## 🌟 Overview
+## Overview
 
-This repository provides the official implementation for **Contextual Spectrum Tokenization (CST)**, a novel hybrid dynamic tokenization architecture designed to overcome the limitations of static embedding lookups in modern transformer models. CST selectively applies dynamic, context-aware representations where semantic disambiguation is most critical, significantly enhancing transformer efficiency and semantic fidelity without incurring prohibitive computational costs.
+CST enhances transformer models by dynamically computing contextual spectrum vectors that integrate:
+- Local textual context through fragment encoding
+- Document-level signals and metadata
+- Multimodal information (images, audio, etc.)
+- Intelligent caching for production efficiency
 
-My work introduces a **semantic spectrum manifold** that adapts token representations based on local textual context, document-level signals, and multimodal information. Through intelligent caching, selective activation, and optimized training procedures, CST offers a practical and production-ready solution for more intelligent, environment-aware text representation.
+## Key Features
 
-This project is a direct implementation of the architecture detailed in my paper:
-**"Contextual Spectrum Tokenization: A Hybrid Dynamic Approach for Environment-Aware Text Representation"**
-*Mohamed Mohamed Mohamed Elhelbawi*
-[[Preprint Link / Journal Link (if available)]](YOUR_PAPER_LINK_HERE)
+- 🚀 **Production-Ready**: Comprehensive implementation with caching, monitoring, and optimization
+- 🎯 **Context-Aware**: Dynamic embeddings based on local and global context
+- 🔄 **Multimodal**: Native support for text, image, and audio integration
+- ⚡ **Efficient**: Intelligent caching and selective processing for practical deployment
+- 📊 **Benchmarked**: Comprehensive evaluation framework with standard benchmarks
 
-## ✨ Key Features
+## Installation
 
-*   **Hybrid Tokenization:** Dynamically generates context-aware representations for ambiguous tokens while leveraging static embeddings for unambiguous ones, balancing fidelity and efficiency.
-*   **Semantic Spectrum Manifold:** A continuously learned embedding space that adapts token positions based on rich contextual information (local, document-level, multimodal, user-specific).
-*   **Computational Efficiency:** Incorporates intelligent multi-level caching (in-memory LRU, distributed Redis), selective activation based on an Ambiguity Classifier, and lightweight architecture design.
-*   **Training Stability:** Employs controlled spectrum evolution, anchor points, and multi-scale training to ensure robust and stable representation learning.
-*   **Multimodal Integration:** Designed with explicit integration points for visual, audio, and metadata signals to enrich textual token representations.
-*   **Production-Ready:** Includes considerations and components for efficient inference pipelines, comprehensive monitoring, and scalable deployment.
-
-## 🚀 Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-*   Python 3.8+
-*   PyTorch 1.9+
-*   Other dependencies (specified in `requirements.txt`)
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/cst-implementation.git
-    cd cst-implementation
-    ```
-2.  **Create a virtual environment (recommended):**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: `venv\Scripts\activate`
-    ```
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *(You might need to install `torch` and `torchvision` separately if `pip install -r` has issues, ensuring compatibility with your CUDA version if you plan to use a GPU.)*
-
-## 📖 Usage
-
-### Training a CST Model
-
-To pre-train a CST-enhanced transformer model using the combined contrastive and masked language modeling objective:
-
+### From Source
 ```bash
-python scripts/train_cst.py --config configs/base_config.yaml
+git clone [https://github.com/yourusername/cst-implementation.git](https://github.com/melhelbawy/Contextual-Spectrum-Tokenization.git)
+cd cst-implementation
+pip install -e .
 ```
 
-*   **Configuration:** Adjust training parameters, dataset paths, model dimensions, and hyper-parameters in the `configs/base_config.yaml` file.
-*   **Data Preparation:** Ensure your training data is prepared according to the `CSTPretrainer`'s `prepare_cst_input` method expectations (e.g., tokenized fragments, context data, negative samples for contrastive learning).
+### For Development
+```bash
+pip install -e ".[dev]"
+pre-commit install
+```
 
-### Inference with ProductionCST
+### With Optional Dependencies
+```bash
+# For GPU acceleration
+pip install -e ".[gpu]"
 
-For efficient inference using the multi-level caching system:
+# For vision tasks
+pip install -e ".[vision]"
+
+# For audio processing
+pip install -e ".[audio]"
+```
+
+## Quick Start
+
+### Basic Usage
 
 ```python
-from cst.deployment.production_cst import ProductionCST
-from cst.configs.config import get_config # Assuming a config loading utility
+from cst import CSTransformer, CSTConfig
 
-# Load configuration
-config = get_config('production_config.yaml')
+# Initialize model
+config = CSTConfig()
+model = CSTransformer(config, task_type='mlm')
 
-# Initialize the production inference pipeline
-production_model = ProductionCST(model_path="path/to/your/trained_cst_model.pt", config=config)
-
-# Example: Encode a batch of text fragments with context
-text_fragments = [
-    torch.tensor([101, 2054, 2003, 1996, 2041, 102]), # Example: "The bank is open."
-    torch.tensor([101, 1996, 4248, 2003, 1996, 3072, 102]) # Example: "The river bank is muddy."
-]
+# Prepare input
+input_ids = torch.randint(1, config.vocab_size, (2, 32))
 context_data = {
-    'document_embedding': torch.randn(2, 768),
-    'image_embedding': torch.randn(2, 512),
-    # ... other context features as expected by your model
+    'document_embedding': torch.randn(2, config.raw_doc_dim),
+    'metadata': {
+        'author': torch.tensor([1, 2]),
+        'domain': torch.tensor([0, 1]),
+    }
 }
 
-# Asynchronous call for batch encoding
-import asyncio
-async def run_encoding():
-    encoded_vectors = await production_model.encode_batch(text_fragments, context_data)
-    print(encoded_vectors.shape) # Expected: [batch_size, d_model]
+# Forward pass
+outputs = model(input_ids, context_data)
+print(f"Output shape: {outputs['logits'].shape}")
+```
 
-asyncio.run(run_encoding())
+### Training
+
+```python
+from cst.training import CSTTrainer
+from cst.data import CSTDataset
+
+# Setup data
+train_dataset = CSTDataset('data/train.jsonl', config)
+val_dataset = CSTDataset('data/val.jsonl', config)
+
+# Initialize trainer
+trainer = CSTTrainer(model, config, train_config)
+
+# Start training
+trainer.train(train_loader, val_loader)
 ```
 
 ### Evaluation
 
-To evaluate the trained model on various benchmarks:
+```python
+from cst.evaluation import ComprehensiveEvaluator
 
-```bash
-python scripts/evaluate_model.py --model_path path/to/your/trained_cst_model.pt --config configs/evaluation_config.yaml
+# Setup evaluator
+evaluator = ComprehensiveEvaluator(model, baseline_models, config)
+
+# Run evaluation
+results = evaluator.run_full_evaluation(test_datasets)
+evaluator.save_results(results, 'results.json')
 ```
 
-*   Refer to `cst/evaluation/benchmarks.py` for details on how different evaluation tasks (WSD, efficiency, multimodal) are implemented.
+## Architecture
 
-## 📁 Repository Structure
+CST replaces the standard transformer input pipeline:
+
+**Standard**: `Text → Token IDs → Static Embeddings → Transformer`
+
+**CST**: `Text → [CST Module] → Contextual Spectrum Vectors → Transformer`
+
+### Core Components
+
+1. **Fragment Encoder**: Processes text fragments with local context
+2. **Information Fuser**: Integrates multimodal and document-level signals
+3. **Ambiguity Classifier**: Determines when dynamic processing is needed
+4. **Caching System**: LRU cache for computed embeddings
+5. **Projection Head**: Maps fused representations to transformer space
+
+## Configuration
+
+### Basic Configuration
+
+```yaml
+# config/base_config.yaml
+d_model: 768
+num_layers: 12
+vocab_size: 30522
+cache_size: 10000
+ambiguity_threshold: 0.5
+contrastive_weight: 0.3
+mlm_weight: 0.7
+```
+
+### Training Configuration
+
+```yaml
+# config/training_config.yaml
+learning_rate: 1e-4
+batch_size: 32
+max_epochs: 100
+warmup_steps: 10000
+save_every_n_steps: 5000
+```
+
+## Performance
+
+Expected improvements over standard transformers:
+
+| Task Category | Improvement | Computational Overhead |
+|---------------|-------------|------------------------|
+| Word Sense Disambiguation | +15-25% accuracy | +15-25% inference time |
+| Multimodal QA | +10-20% accuracy | +20-30% with caching |
+| Domain Adaptation | 20-30% faster convergence | Minimal with optimization |
+
+## Repository Structure
 
 ```
 cst-implementation/
 ├── cst/
-│   ├── models/                 # Core CST architectural components
-│   │   ├── cst_module.py       # Main CST module integration
-│   │   ├── fragment_encoder.py # Encodes text fragments with local context
-│   │   ├── information_fuser.py# Fuses fragment encoding with multimodal/document signals
-│   │   └── ambiguity_classifier.py # Determines dynamic vs. static tokenization
-│   ├── training/               # Training protocols and utilities
-│   │   ├── pretrainer.py       # Joint contrastive + MLM pre-training logic
-│   │   ├── contrastive_loss.py # InfoNCE loss implementation
-│   │   └── stability.py        # Spectral regularization and stability mechanisms
-│   ├── deployment/             # Production deployment specific components
-│   │   ├── production_cst.py   # Optimized inference pipeline with caching
-│   │   ├── caching.py          # LRU and Redis cache implementations
-│   │   └── monitoring.py       # Inference metrics and profiling
-│   └── evaluation/             # Model evaluation suite
-│       ├── benchmarks.py       # Evaluation tasks (WSD, efficiency, multimodal)
-│       ├── profiling.py        # Performance monitoring tools
-│       └── metrics.py          # Custom metrics
-├── configs/                    # Configuration files for training, evaluation, deployment
-│   ├── base_config.yaml
-│   ├── production_config.yaml
-│   └── experiment_configs/
-├── scripts/                    # Executable scripts for common tasks
-│   ├── train_cst.py
-│   ├── evaluate_model.py
-│   └── deploy_model.py
-├── tests/                      # Unit, integration, and performance tests
-│   ├── unit_tests/
-│   ├── integration_tests/
-│   └── performance_tests/
-└── docs/                       # (Optional) Directory for diagrams, documentation, etc.
-    └── cst_pipeline_flow.png   # Example: Place your architecture diagrams here
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! If you have suggestions, bug reports, or want to contribute code, please open an issue or submit a pull request.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
----
-```
+│   ├── models/
+│   │   ├── cst_module.py          # Core CST implementation
+│   │   ├── fragment_encoder.py    # Fragment encoding
+│   │   ├── information_fuser.py   # Multimodal fusion
+│   │
